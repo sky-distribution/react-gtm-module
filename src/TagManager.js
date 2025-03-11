@@ -1,4 +1,5 @@
 import Snippets from './Snippets'
+import warn from './utils/warn'
 
 const TagManager = {
 	dataScript: function (dataLayer, dataLayerName, nonce) {
@@ -13,14 +14,9 @@ const TagManager = {
 	gtm: function (args) {
 		const snippets = Snippets.tags(args)
 
-		const noScript = () => {
-			const noscript = document.createElement('noscript')
-			noscript.innerHTML = snippets.iframe
-			return noscript
-		}
-
 		const script = () => {
 			const script = document.createElement('script')
+			script.setAttribute('data-testid', 'gtm')
 			script.innerHTML = snippets.script
 			if (args.nonce) {
 				script.setAttribute('nonce', args.nonce)
@@ -31,7 +27,6 @@ const TagManager = {
 		const dataScript = this.dataScript(snippets.dataLayerVar, args.dataLayerName, args.nonce)
 
 		return {
-			noScript,
 			script,
 			dataScript,
 		}
@@ -46,6 +41,10 @@ const TagManager = {
 		nonce = undefined,
 		source = 'https://googletagmanager.com/gtm.js',
 	}) {
+		if (!gtmId) {
+			warn('GTM Id is required')
+			return
+		}
 		const gtm = this.gtm({
 			id: gtmId,
 			events,
@@ -58,7 +57,6 @@ const TagManager = {
 		})
 		if (dataLayer) document.head.appendChild(gtm.dataScript)
 		document.head.insertBefore(gtm.script(), document.head.childNodes[0])
-		document.body.insertBefore(gtm.noScript(), document.body.childNodes[0])
 	},
 	dataLayer: function ({ dataLayer, dataLayerName = 'dataLayer' }) {
 		if (window[dataLayerName]) return window[dataLayerName].push(dataLayer)

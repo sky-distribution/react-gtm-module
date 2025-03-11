@@ -14,20 +14,6 @@ describe('Snippets', () => {
 		snippets = Snippets.tags(args)
 	})
 
-	it('should use the `id` for the iframe', () => {
-		expect(snippets.iframe).toContain(`id=${args.id}`, 1)
-	})
-
-	it('should use the `gtm_auth` and `gtm_preview` for the iframe', () => {
-		Object.assign(args, {
-			auth: '6sBOnZx1hqPcO01xPOytLK',
-			preview: 'env-2',
-		})
-		snippets = Snippets.tags(args)
-		expect(snippets.iframe).toContain(`gtm_auth=${args.auth}`, 1)
-		expect(snippets.iframe).toContain(`gtm_preview=${args.preview}`, 1)
-	})
-
 	it('should use the `dataLayer` for the script', () => {
 		args = { dataLayer: { name: 'test' } }
 		snippets = Snippets.dataLayer(args)
@@ -40,30 +26,11 @@ describe('Snippets', () => {
 		expect(snippets).toContain('customName')
 	})
 
-	it('no id provided should log a warn', () => {
-		console.warn = jest.fn()
-		const noIdArgs = {
-			dataLayerName: 'dataLayer',
-			events: {},
-			source: 'https://googletagmanager.com/gtm.js',
-		}
-		Snippets.tags(noIdArgs)
-		expect(console.warn).toBeCalled()
-	})
-
 	it('should use the nonce for the script', () => {
 		const nonce = 'pKFLb6zigj6vHak2TVeKx'
 		Object.assign(args, { nonce })
 		snippets = Snippets.tags(args)
 		expect(snippets.script).toContain(`setAttribute('nonce','${nonce}')`, 1)
-	})
-
-	it('should use the source URL in iframe', () => {
-		const source = 'https://tracking.example.com/gtm.js'
-		const url = new URL(source)
-		Object.assign(args, { source })
-		snippets = Snippets.tags(args)
-		expect(snippets.iframe).toContain(`src="${url.origin}/ns.html`)
 	})
 
 	it('should use the source URL in script', () => {
@@ -78,5 +45,13 @@ describe('Snippets', () => {
 		Object.assign(args, { events })
 		snippets = Snippets.tags(args)
 		expect(snippets.script).toContain(JSON.stringify(events).slice(1, -1))
+	})
+
+	it('should set up auth and preview in the script', () => {
+		const auth = 'auth'
+		const preview = 'preview'
+		Object.assign(args, { auth, preview })
+		snippets = Snippets.tags(args)
+		expect(snippets.script).toContain(`&gtm_auth=${auth}&gtm_preview=${preview}`)
 	})
 })
