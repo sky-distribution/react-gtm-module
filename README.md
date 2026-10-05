@@ -7,15 +7,27 @@ This is a JS module to [React](https://facebook.github.io/react/)-based apps tha
 It was [originally created and maintained](https://github.com/alinemorelli/react-gtm) by [@alinemorelli](https://github.com/alinemorelli), but has not been further developed since September 2020. A whole series of feature requests and pull requests have remained unprocessed since then, which have been partly included here. On top a few further changes and a fix were applied. You can find out more about it in the [comparison section](#comparison-to-orginal-module).  
 A [migration guide](#migration-guide) is provided too.
 
+This repository is the sky-distribution fork of [@sooro-io/react-gtm-module](https://github.com/sooro-io/react-gtm-module) 3.0.1, published to GitHub Packages as `@sky-distribution/react-gtm-module`. Compared to the upstream it does not inject the `<noscript>` iframe and `initialize` returns early (with a console warning) when `gtmId` is missing.
+
 ## Getting Started
+
+The package lives in GitHub Packages, so the consuming project needs an `.npmrc` that maps the scope to it, with `NPM_TOKEN` exported in the environment:
+
+```ini
+@sky-distribution:registry=https://npm.pkg.github.com
+//npm.pkg.github.com/:_authToken=${NPM_TOKEN}
+registry=https://registry.npmjs.org
+```
 
 Open up your terminal and install the package with your preferred package manager.
 
 ```bash
-npm install @sooro-io/react-gtm-module
+npm install @sky-distribution/react-gtm-module
 # OR
-yarn add @sooro-io/react-gtm-module
+pnpm add @sky-distribution/react-gtm-module
 ```
+
+Every push to `main` publishes the version from `package.json` (the CI patch-bumps it when that version is already tagged).
 
 You need to adjust the code in your React application's entry file. If you started your application via Create React App, it's about `src/index.js` or `src/index.ts`.
 
@@ -26,7 +38,7 @@ import './index.css'
 import App from './App'
 
 // start changes
-import TagManager from '@sooro-io/react-gtm-module'
+import TagManager from '@sky-distribution/react-gtm-module'
 
 const tagManagerArgs = {
     gtmId: 'GTM-xxxxxx', // replace with your GTM container ID
@@ -55,7 +67,7 @@ You can interact with the dataLayer (to trigger events or push new data to it) i
 
 ```js
 import React from 'react'
-import TagManager from 'react-gtm-module'
+import TagManager from '@sky-distribution/react-gtm-module'
 
 const Home = () => {
     TagManager.dataLayer({
@@ -205,23 +217,23 @@ The `events` argument was inteded to add events into the dataLayer before GTM ge
 ## Migration Guide
 
 **Dependencies**  
-All you have to do is change the package. The previous TypeScript definitions are no longer required as the types are now included in the package.
+All you have to do is change the package (with the `.npmrc` scope mapping from [Getting Started](#getting-started)). The previous TypeScript definitions are no longer required as the types are now included in the package.
 
 ```bash
 npm uninstall react-gtm-module @types/react-gtm-module
-npm install @sooro-io/react-gtm-module
+npm install @sky-distribution/react-gtm-module
 
 # OR
 
-yarn remove react-gtm-module @types/react-gtm-module
-yarn install @sooro-io/react-gtm-module
+pnpm remove react-gtm-module @types/react-gtm-module
+pnpm add @sky-distribution/react-gtm-module
 ```
 
 **Imports**
 
 ```diff
 - import TagManager from 'react-gtm-module'
-+ import TagManager from '@sooro-io/react-gtm-module'
++ import TagManager from '@sky-distribution/react-gtm-module'
 ```
 
 **`events` arg**  
