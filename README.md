@@ -19,7 +19,7 @@ npm install @sky-distribution/react-gtm-module
 pnpm add @sky-distribution/react-gtm-module
 ```
 
-Every push to `main` publishes the version from `package.json` (the CI patch-bumps it when that version is already tagged).
+Every push to `main` that changes more than the README publishes the version from `package.json` (the CI patch-bumps it when that version is already tagged).
 
 You need to adjust the code in your React application's entry file. If you started your application via Create React App, it's about `src/index.js` or `src/index.ts`.
 

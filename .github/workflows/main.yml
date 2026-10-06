@@ -9,12 +9,13 @@ on:
 
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
   test:
     if: "!contains(github.event.head_commit.committer.name, 'github-actions[bot]')"
     runs-on: org-linux-gh-runner
+    timeout-minutes: 15
     permissions:
       contents: read
     steps:
@@ -51,6 +52,7 @@ jobs:
     if: "github.ref == 'refs/heads/main' && github.event_name == 'push' && !contains(github.event.head_commit.committer.name, 'github-actions[bot]')"
     needs: test
     runs-on: org-linux-gh-runner
+    timeout-minutes: 15
     permissions:
       contents: write
       packages: write
@@ -86,12 +88,16 @@ jobs:
           echo "version_changed=false" >> "$GITHUB_OUTPUT"
           while true; do
             GET_API_URL="https://api.github.com/repos/${GITHUB_REPOSITORY}/git/ref/tags/${CURRENT_VERSION}"
-            http_status_code=$(curl -LI "$GET_API_URL" -o /dev/null -w '%{http_code}\n' -s \
+            http_status_code=$(curl -LI "$GET_API_URL" -o /dev/null -w '%{http_code}\n' -sS \
               -H "Authorization: token ${GITHUB_TOKEN}")
             if [ "$http_status_code" -eq "404" ] ; then
               echo "CURRENT_VERSION=${CURRENT_VERSION}" >> "$GITHUB_ENV"
               echo "CURRENT_VERSION=${CURRENT_VERSION}"
               exit 0
+            fi
+            if [ "$http_status_code" -ne "200" ] ; then
+              echo "::error::GitHub API returned ${http_status_code} for ${GET_API_URL}"
+              exit 1
             fi
             echo "version_changed=true" >> "$GITHUB_OUTPUT"
             CURRENT_VERSION=$(npm version --git-tag-version=false patch)
