@@ -1,19 +1,27 @@
 {
-	"name": "@sooro-io/react-gtm-module",
-	"version": "3.0.1",
+	"name": "@sky-distribution/react-gtm-module",
+	"version": "3.1.0",
 	"description": "React Google Tag Manager Module",
 	"main": "dist/index.js",
 	"types": "types/index.d.ts",
+	"files": [
+		"dist",
+		"types"
+	],
+	"publishConfig": {
+		"access": "restricted"
+	},
 	"scripts": {
 		"lint": "eslint .",
 		"jest": "jest",
 		"test": "npm run lint && npm run jest",
 		"build": "babel src -d dist --ignore src/__tests__",
-		"prepublish": "npm run build"
+		"get-version": "node -e \"console.log(process.env.npm_package_version);\"",
+		"prepare": "npm run build"
 	},
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/sooro-io/react-gtm-module"
+		"url": "git+https://github.com/sky-distribution/react-gtm-module.git"
 	},
 	"author": {
 		"name": "Daniel Bartylla",
@@ -22,9 +30,9 @@
 	},
 	"license": "MIT",
 	"bugs": {
-		"url": "https://github.com/sooro-io/react-gtm-module/issues"
+		"url": "https://github.com/sky-distribution/react-gtm-module/issues"
 	},
-	"homepage": "",
+	"homepage": "https://github.com/sky-distribution/react-gtm-module#readme",
 	"keywords": [
 		"react",
 		"reactjs",
