@@ -11,14 +11,6 @@ This repository is the sky-distribution fork of [@sooro-io/react-gtm-module](htt
 
 ## Getting Started
 
-The package lives in GitHub Packages, so the consuming project needs an `.npmrc` that maps the scope to it, with `NPM_TOKEN` exported in the environment:
-
-```ini
-@sky-distribution:registry=https://npm.pkg.github.com
-//npm.pkg.github.com/:_authToken=${NPM_TOKEN}
-registry=https://registry.npmjs.org
-```
-
 Open up your terminal and install the package with your preferred package manager.
 
 ```bash
@@ -217,7 +209,7 @@ The `events` argument was inteded to add events into the dataLayer before GTM ge
 ## Migration Guide
 
 **Dependencies**  
-All you have to do is change the package (with the `.npmrc` scope mapping from [Getting Started](#getting-started)). The previous TypeScript definitions are no longer required as the types are now included in the package.
+All you have to do is change the package. The previous TypeScript definitions are no longer required as the types are now included in the package.
 
 ```bash
 npm uninstall react-gtm-module @types/react-gtm-module

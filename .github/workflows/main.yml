@@ -1,4 +1,4 @@
-name: CI
+name: Publish
 
 on:
   push:
@@ -14,12 +14,12 @@ concurrency:
 jobs:
   test:
     if: "!contains(github.event.head_commit.committer.name, 'github-actions[bot]')"
-    runs-on: ubuntu-latest
+    runs-on: org-linux-gh-runner
     permissions:
       contents: read
     steps:
       - name: Git checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@main
         with:
           persist-credentials: false
 
@@ -32,7 +32,7 @@ jobs:
           severity: "CRITICAL,HIGH"
 
       - name: Set up Node.js
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@main
         with:
           node-version-file: ".nvmrc"
           cache: "npm"
@@ -50,13 +50,13 @@ jobs:
   publish:
     if: "github.ref == 'refs/heads/main' && github.event_name == 'push' && !contains(github.event.head_commit.committer.name, 'github-actions[bot]')"
     needs: test
-    runs-on: ubuntu-latest
+    runs-on: org-linux-gh-runner
     permissions:
       contents: write
       packages: write
     steps:
       - name: Git checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@main
         with:
           fetch-depth: 0
 
@@ -66,7 +66,7 @@ jobs:
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
 
       - name: Set up Node.js
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@main
         with:
           node-version-file: ".nvmrc"
           cache: "npm"
