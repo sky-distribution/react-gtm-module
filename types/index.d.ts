@@ -1,7 +1,17 @@
 declare const TagManager: {
 	dataLayer: (dataLayerArgs: DataLayerArgs) => void
 	initialize: (tagManagerArgs: TagManagerArgs) => void
+	createPageChangeEvent: (fields: PageChangeFields) => PageChangeEvent
+	pageChange: (args: PageChangeArgs) => void
 }
+
+export type PageChangeTarget = { route: string; templateName?: string } | { route?: string; templateName: string }
+
+export type PageChangeFields = PageChangeTarget & { deployName?: string }
+
+export type PageChangeEvent = { event: 'pageChange' } & PageChangeFields
+
+export type PageChangeArgs = PageChangeFields & { dataLayerName?: string }
 
 export interface TagManagerArgs {
 	/**

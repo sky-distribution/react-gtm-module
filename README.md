@@ -92,6 +92,26 @@ TagManager.dataLayer({
 })
 ```
 
+### Page change event
+
+`pageChange` pushes the `pageChange` event shared by all frontends that use the common GTM container. The contract accepts both variants of the fields: `route`, `templateName`, or both, plus an optional `deployName`. At least one of `route` and `templateName` is required (the types enforce it).
+
+```js
+TagManager.pageChange({ route: '/oferta', templateName: 'Offer', deployName: 'prod' })
+// pushes { event: 'pageChange', route: '/oferta', templateName: 'Offer', deployName: 'prod' }
+```
+
+Fields that are empty or `undefined` are not added to the event, because `undefined` would clear a variable that someone else set in the GTM data model. Use `dataLayerName` to push to a custom dataLayer. If `window[dataLayerName]` does not exist yet, `dataLayer` injects a script that creates it, as before.
+
+To get the event object without pushing it, use `createPageChangeEvent`:
+
+```js
+const event = TagManager.createPageChangeEvent({ route: '/oferta' })
+// { event: 'pageChange', route: '/oferta' }
+```
+
+The caller decides whether GTM is enabled and whether the user gave consent (Consent Mode); `pageChange` pushes the event unconditionally.
+
 ## Configuration
 
 To adapt your GTM configuration to your needs, a number of options are available. You can find examples for each of them below the table.

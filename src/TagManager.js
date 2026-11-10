@@ -1,3 +1,4 @@
+import { createPageChangeEvent } from './PageChange'
 import Snippets from './Snippets'
 import warn from './utils/warn'
 
@@ -63,6 +64,12 @@ const TagManager = {
 		const snippets = Snippets.dataLayer(dataLayer, dataLayerName)
 		const dataScript = this.dataScript(snippets, dataLayerName)
 		document.head.insertBefore(dataScript, document.head.childNodes[0])
+	},
+	createPageChangeEvent,
+	pageChange: function ({ dataLayerName = 'dataLayer', ...fields }) {
+		const event = createPageChangeEvent(fields)
+
+		return TagManager.dataLayer({ dataLayer: event, dataLayerName })
 	},
 }
 

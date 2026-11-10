@@ -87,4 +87,64 @@ describe('TagManager', () => {
 		expect(window['dataLayer']).not.toBeUndefined()
 		expect(window['dataLayer']).toHaveLength(1)
 	})
+
+	describe('pageChange', () => {
+		beforeEach(() => {
+			window['dataLayer'] = []
+			window['customName'] = []
+		})
+
+		afterEach(() => {
+			jest.restoreAllMocks()
+			delete window['customName']
+		})
+
+		it('should push the event to the default dataLayer', () => {
+			TagManager.pageChange({ route: '/oferta', deployName: 'prod' })
+
+			expect(window['dataLayer']).toStrictEqual([{ event: 'pageChange', route: '/oferta', deployName: 'prod' }])
+		})
+
+		it('should push the event to a custom dataLayer', () => {
+			TagManager.pageChange({ templateName: 'Offer', dataLayerName: 'customName' })
+
+			expect(window['customName']).toStrictEqual([{ event: 'pageChange', templateName: 'Offer' }])
+			expect(window['dataLayer']).toHaveLength(0)
+		})
+
+		it.each([
+			{ title: 'a custom', input: { dataLayerName: 'customName' }, expected: 'customName' },
+			{ title: 'the default', input: {}, expected: 'dataLayer' },
+		])('should delegate to dataLayer with $title dataLayerName', ({ input, expected }) => {
+			const dataLayerSpy = jest.spyOn(TagManager, 'dataLayer').mockImplementation(() => undefined)
+
+			TagManager.pageChange({ route: '/oferta', ...input })
+
+			expect(dataLayerSpy).toHaveBeenCalledWith({
+				dataLayer: { event: 'pageChange', route: '/oferta' },
+				dataLayerName: expected,
+			})
+		})
+
+		it('should work after destructuring', () => {
+			const { pageChange } = TagManager
+
+			pageChange({ route: '/oferta' })
+
+			expect(window['dataLayer']).toStrictEqual([{ event: 'pageChange', route: '/oferta' }])
+		})
+
+		it('should omit empty fields in the pushed object', () => {
+			TagManager.pageChange({ route: '/oferta', templateName: '', deployName: undefined })
+
+			expect(window['dataLayer']).toStrictEqual([{ event: 'pageChange', route: '/oferta' }])
+		})
+
+		it('should expose createPageChangeEvent', () => {
+			expect(TagManager.createPageChangeEvent({ route: '/oferta' })).toStrictEqual({
+				event: 'pageChange',
+				route: '/oferta',
+			})
+		})
+	})
 })
