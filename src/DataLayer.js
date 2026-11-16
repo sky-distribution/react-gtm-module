@@ -4,31 +4,23 @@ import warn from './utils/warn'
 
 /**
  * Pushes the events shared by every frontend that reports to the common
- * GTM container. By default an instance pushes to `window[dataLayerName]`
- * through `TagManager.dataLayer`; pass `push` to route the events through
- * your own gate (feature flag, Consent Mode, queueing).
+ * GTM container. An instance pushes to `window[dataLayerName]` through
+ * `TagManager.dataLayer`. An application that has its own gate (feature flag,
+ * Consent Mode) checks it before calling `pageChange`.
  *
  * @param {object} [options]
- * @param {string} [options.dataLayerName='dataLayer'] Name of the dataLayer array on `window`, used by the default transport.
+ * @param {string} [options.dataLayerName='dataLayer'] Name of the dataLayer array on `window`.
  * @param {string} [options.deployName] Deployment name added to every event unless the call overrides it, for example `'prod'`.
- * @param {(event: object) => void} [options.push] Transport that receives each built event instead of the default push.
  * @example
  * const dataLayer = new DataLayer({ deployName: 'prod' })
  * dataLayer.pageChange({ route: '/oferta', templateName: 'Offer' })
- * @example
- * const dataLayer = new DataLayer({ push: (event) => trackEvent(event) })
  */
 class DataLayer {
 	static #PAGE_CHANGE_EVENT = 'pageChange'
 
-	constructor({
-		dataLayerName = 'dataLayer',
-		deployName,
-		push = (event) =>
-			TagManager.dataLayer({ dataLayer: event, dataLayerName }),
-	} = {}) {
+	constructor({ dataLayerName = 'dataLayer', deployName } = {}) {
+		this.dataLayerName = dataLayerName
 		this.deployName = deployName
-		this.push = push
 	}
 
 	/**
@@ -57,7 +49,10 @@ class DataLayer {
 
 		const event = { event: DataLayer.#PAGE_CHANGE_EVENT, ...fields }
 
-		this.push(event)
+		TagManager.dataLayer({
+			dataLayer: event,
+			dataLayerName: this.dataLayerName,
+		})
 
 		return event
 	}

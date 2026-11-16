@@ -29,11 +29,17 @@ describe('DataLayer', () => {
 
 		it('should push to a custom dataLayer name', () => {
 			window['customName'] = []
+			const dataLayerSpy = jest.spyOn(TagManager, 'dataLayer')
 
 			new DataLayer({ dataLayerName: 'customName' }).pageChange({
 				route: '/oferta',
 			})
 
+			expect(dataLayerSpy).toHaveBeenCalledTimes(1)
+			expect(dataLayerSpy).toHaveBeenCalledWith({
+				dataLayer: { event: 'pageChange', route: '/oferta' },
+				dataLayerName: 'customName',
+			})
 			expect(window['customName']).toStrictEqual([
 				{ event: 'pageChange', route: '/oferta' },
 			])
@@ -59,79 +65,79 @@ describe('DataLayer', () => {
 				{ event: 'pageChange', route: '/oferta' },
 			])
 		})
-
-		it('should hand every event to a custom push', () => {
-			const pushMock = jest.fn()
-
-			const event = new DataLayer({ push: pushMock }).pageChange({
-				route: '/oferta',
-			})
-
-			expect(pushMock).toHaveBeenCalledTimes(1)
-			expect(pushMock).toHaveBeenCalledWith({
-				event: 'pageChange',
-				route: '/oferta',
-			})
-			expect(event).toBe(pushMock.mock.calls[0][0])
-			expect(window['dataLayer']).toBeUndefined()
-		})
 	})
 
 	describe('pageChange', () => {
-		it('should add the deployName given to the constructor', () => {
-			const pushMock = jest.fn()
+		let dataLayerSpy
 
-			const event = new DataLayer({
-				deployName: 'prod',
-				push: pushMock,
-			}).pageChange({ route: '/oferta' })
+		beforeEach(() => {
+			dataLayerSpy = jest
+				.spyOn(TagManager, 'dataLayer')
+				.mockImplementation(() => undefined)
+		})
+
+		it('should push the returned event through TagManager.dataLayer', () => {
+			const event = new DataLayer().pageChange({ route: '/oferta' })
+
+			expect(dataLayerSpy).toHaveBeenCalledTimes(1)
+			expect(dataLayerSpy).toHaveBeenCalledWith({
+				dataLayer: { event: 'pageChange', route: '/oferta' },
+				dataLayerName: 'dataLayer',
+			})
+			expect(event).toBe(dataLayerSpy.mock.calls[0][0].dataLayer)
+		})
+
+		it('should add the deployName given to the constructor', () => {
+			const event = new DataLayer({ deployName: 'prod' }).pageChange({
+				route: '/oferta',
+			})
 
 			expect(event).toStrictEqual({
 				event: 'pageChange',
 				route: '/oferta',
 				deployName: 'prod',
 			})
-			expect(pushMock).toHaveBeenCalledTimes(1)
-			expect(pushMock).toHaveBeenCalledWith({
-				event: 'pageChange',
-				route: '/oferta',
-				deployName: 'prod',
+			expect(dataLayerSpy).toHaveBeenCalledTimes(1)
+			expect(dataLayerSpy).toHaveBeenCalledWith({
+				dataLayer: {
+					event: 'pageChange',
+					route: '/oferta',
+					deployName: 'prod',
+				},
+				dataLayerName: 'dataLayer',
 			})
 		})
 
 		it('should prefer the deployName given to the call', () => {
-			const pushMock = jest.fn()
-
-			const event = new DataLayer({
-				deployName: 'prod',
-				push: pushMock,
-			}).pageChange({ route: '/oferta', deployName: 'uat' })
+			const event = new DataLayer({ deployName: 'prod' }).pageChange({
+				route: '/oferta',
+				deployName: 'uat',
+			})
 
 			expect(event).toStrictEqual({
 				event: 'pageChange',
 				route: '/oferta',
 				deployName: 'uat',
 			})
-			expect(pushMock).toHaveBeenCalledTimes(1)
-			expect(pushMock).toHaveBeenCalledWith({
-				event: 'pageChange',
-				route: '/oferta',
-				deployName: 'uat',
+			expect(dataLayerSpy).toHaveBeenCalledTimes(1)
+			expect(dataLayerSpy).toHaveBeenCalledWith({
+				dataLayer: {
+					event: 'pageChange',
+					route: '/oferta',
+					deployName: 'uat',
+				},
+				dataLayerName: 'dataLayer',
 			})
 		})
 
 		it('should leave deployName out when none is given', () => {
-			const pushMock = jest.fn()
-
-			const event = new DataLayer({ push: pushMock }).pageChange({
-				route: '/oferta',
-			})
+			const event = new DataLayer().pageChange({ route: '/oferta' })
 
 			expect(event).not.toHaveProperty('deployName')
-			expect(pushMock).toHaveBeenCalledTimes(1)
-			expect(pushMock).toHaveBeenCalledWith({
-				event: 'pageChange',
-				route: '/oferta',
+			expect(dataLayerSpy).toHaveBeenCalledTimes(1)
+			expect(dataLayerSpy).toHaveBeenCalledWith({
+				dataLayer: { event: 'pageChange', route: '/oferta' },
+				dataLayerName: 'dataLayer',
 			})
 		})
 
@@ -139,18 +145,16 @@ describe('DataLayer', () => {
 			{ title: 'an empty', templateName: '' },
 			{ title: 'an undefined', templateName: undefined },
 		])('should leave $title templateName out', ({ templateName }) => {
-			const pushMock = jest.fn()
-
-			const event = new DataLayer({ push: pushMock }).pageChange({
+			const event = new DataLayer().pageChange({
 				route: '/oferta',
 				templateName,
 			})
 
 			expect(event).toStrictEqual({ event: 'pageChange', route: '/oferta' })
-			expect(pushMock).toHaveBeenCalledTimes(1)
-			expect(pushMock).toHaveBeenCalledWith({
-				event: 'pageChange',
-				route: '/oferta',
+			expect(dataLayerSpy).toHaveBeenCalledTimes(1)
+			expect(dataLayerSpy).toHaveBeenCalledWith({
+				dataLayer: { event: 'pageChange', route: '/oferta' },
+				dataLayerName: 'dataLayer',
 			})
 		})
 
@@ -158,43 +162,35 @@ describe('DataLayer', () => {
 			{ title: 'an empty', deployName: '' },
 			{ title: 'an undefined', deployName: undefined },
 		])('should leave $title deployName out', ({ deployName }) => {
-			const pushMock = jest.fn()
-
-			const event = new DataLayer({ push: pushMock }).pageChange({
+			const event = new DataLayer().pageChange({
 				route: '/oferta',
 				deployName,
 			})
 
 			expect(event).toStrictEqual({ event: 'pageChange', route: '/oferta' })
-			expect(pushMock).toHaveBeenCalledTimes(1)
-			expect(pushMock).toHaveBeenCalledWith({
-				event: 'pageChange',
-				route: '/oferta',
+			expect(dataLayerSpy).toHaveBeenCalledTimes(1)
+			expect(dataLayerSpy).toHaveBeenCalledWith({
+				dataLayer: { event: 'pageChange', route: '/oferta' },
+				dataLayerName: 'dataLayer',
 			})
 		})
 
 		it('should accept a templateName without a route', () => {
-			const pushMock = jest.fn()
-
-			const event = new DataLayer({ push: pushMock }).pageChange({
-				templateName: 'Offer',
-			})
+			const event = new DataLayer().pageChange({ templateName: 'Offer' })
 
 			expect(event).toStrictEqual({
 				event: 'pageChange',
 				templateName: 'Offer',
 			})
-			expect(pushMock).toHaveBeenCalledTimes(1)
-			expect(pushMock).toHaveBeenCalledWith({
-				event: 'pageChange',
-				templateName: 'Offer',
+			expect(dataLayerSpy).toHaveBeenCalledTimes(1)
+			expect(dataLayerSpy).toHaveBeenCalledWith({
+				dataLayer: { event: 'pageChange', templateName: 'Offer' },
+				dataLayerName: 'dataLayer',
 			})
 		})
 
 		it('should keep event first and then route, templateName and deployName', () => {
-			const pushMock = jest.fn()
-
-			const event = new DataLayer({ push: pushMock }).pageChange({
+			const event = new DataLayer().pageChange({
 				deployName: 'prod',
 				templateName: 'Offer',
 				route: '/oferta',
@@ -206,12 +202,15 @@ describe('DataLayer', () => {
 				'templateName',
 				'deployName',
 			])
-			expect(pushMock).toHaveBeenCalledTimes(1)
-			expect(pushMock).toHaveBeenCalledWith({
-				event: 'pageChange',
-				route: '/oferta',
-				templateName: 'Offer',
-				deployName: 'prod',
+			expect(dataLayerSpy).toHaveBeenCalledTimes(1)
+			expect(dataLayerSpy).toHaveBeenCalledWith({
+				dataLayer: {
+					event: 'pageChange',
+					route: '/oferta',
+					templateName: 'Offer',
+					deployName: 'prod',
+				},
+				dataLayerName: 'dataLayer',
 			})
 		})
 
@@ -223,23 +222,19 @@ describe('DataLayer', () => {
 		])(
 			'should warn and push nothing without a route and a templateName for $title',
 			({ fields }) => {
-				const pushMock = jest.fn()
-
-				const event = new DataLayer({ push: pushMock }).pageChange(fields)
+				const event = new DataLayer().pageChange(fields)
 
 				expect(warn).toHaveBeenCalledTimes(1)
 				expect(warn).toHaveBeenCalledWith(
 					'pageChange needs a route or a templateName',
 				)
-				expect(pushMock).not.toHaveBeenCalled()
+				expect(dataLayerSpy).not.toHaveBeenCalled()
 				expect(event).toBeUndefined()
 			},
 		)
 
 		it('should ignore values that are not strings', () => {
-			const pushMock = jest.fn()
-
-			const event = new DataLayer({ push: pushMock }).pageChange({
+			const event = new DataLayer().pageChange({
 				route: 42,
 				templateName: 'Offer',
 			})
@@ -248,10 +243,10 @@ describe('DataLayer', () => {
 				event: 'pageChange',
 				templateName: 'Offer',
 			})
-			expect(pushMock).toHaveBeenCalledTimes(1)
-			expect(pushMock).toHaveBeenCalledWith({
-				event: 'pageChange',
-				templateName: 'Offer',
+			expect(dataLayerSpy).toHaveBeenCalledTimes(1)
+			expect(dataLayerSpy).toHaveBeenCalledWith({
+				dataLayer: { event: 'pageChange', templateName: 'Offer' },
+				dataLayerName: 'dataLayer',
 			})
 		})
 	})

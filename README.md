@@ -105,22 +105,11 @@ dataLayer.pageChange({ route: '/oferta', templateName: 'Offer' })
 // pushes { event: 'pageChange', route: '/oferta', templateName: 'Offer', deployName: 'prod' }
 ```
 
-By default an instance pushes to `window.dataLayer` through `TagManager.dataLayer`. Use `dataLayerName` to push to a custom dataLayer. If `window[dataLayerName]` does not exist yet, `TagManager.dataLayer` injects a script that creates it, so a frontend that gates analytics itself should pass its own `push`.
-
-The `push` option replaces the default transport: it receives every built event, so you can route the events through your own gate (feature flag, Consent Mode, queueing).
-
-```js
-const dataLayer = new DataLayer({
-    deployName: 'prod',
-    push: (event) => trackEvent(event),
-})
-
-dataLayer.pageChange({ route: '/oferta', templateName: 'Offer' })
-```
+An instance always pushes through `TagManager.dataLayer`, to `window.dataLayer` by default. Use `dataLayerName` to push to a custom dataLayer. If `window[dataLayerName]` does not exist yet, `TagManager.dataLayer` injects a script that creates it.
 
 `pageChange` returns the event it built. Fields that are empty or `undefined` are not added to the event, because `undefined` would clear a variable that someone else set in the GTM data model. When neither `route` nor `templateName` is given, `pageChange` logs a warning, pushes nothing and returns `undefined`. The `deployName` given to a call overrides the one given to the constructor.
 
-The caller decides whether GTM is enabled and whether the user gave consent (Consent Mode). The default transport pushes the event unconditionally.
+The class always pushes through `TagManager.dataLayer`, so the application decides whether GTM is enabled and whether the user gave consent (Consent Mode) before it calls `pageChange`.
 
 ## Configuration
 
