@@ -1,6 +1,7 @@
 declare const TagManager: {
 	dataLayer: (dataLayerArgs: DataLayerArgs) => void
 	initialize: (tagManagerArgs: TagManagerArgs) => void
+	DataLayer: typeof DataLayer
 }
 
 export interface TagManagerArgs {
@@ -47,6 +48,57 @@ export interface DataLayerArgs {
 	 * Custom name for dataLayer object.
 	 */
 	dataLayerName?: string
+}
+
+export type PageChangeTarget =
+	| { route: string; templateName?: string }
+	| { route?: string; templateName: string }
+
+export type PageChangeFields = PageChangeTarget & {
+	/**
+	 * Overrides the deployment name given to the constructor.
+	 */
+	deployName?: string
+}
+
+export type PageChangeEvent = { event: 'pageChange' } & PageChangeFields
+
+export type DataLayerOptions = {
+	/**
+	 * Name of the dataLayer array on `window`.
+	 */
+	dataLayerName?: string
+	/**
+	 * Deployment name added to every event unless the call overrides it.
+	 */
+	deployName?: string
+}
+
+/**
+ * Pushes the events shared by every frontend that reports to the common
+ * GTM container. An instance pushes to `window[dataLayerName]` through
+ * `TagManager.dataLayer`. An application that has its own gate (feature flag,
+ * Consent Mode) checks it before calling `pageChange`.
+ *
+ * @param options Optional settings: `dataLayerName` (default `'dataLayer'`) is the name of the dataLayer array on `window`, and `deployName` is added to every event unless the call overrides it.
+ * @example
+ * const dataLayer = new DataLayer({ deployName: 'prod' })
+ * dataLayer.pageChange({ route: '/oferta', templateName: 'Offer' })
+ */
+export declare class DataLayer {
+	constructor(options?: DataLayerOptions)
+	/**
+	 * Builds and pushes the `pageChange` event. Empty and missing fields are
+	 * left out of the event, because `undefined` clears the variable in the
+	 * GTM data model. At least one of `route` and `templateName` is required.
+	 *
+	 * @param fields `route` is the path of the page, for example `'/oferta'`; `templateName` is the name of the page template, for example `'Offer'`; `deployName` overrides the deployment name given to the constructor.
+	 * @returns The pushed event, or `undefined` when neither `route` nor `templateName` is a non-empty string; no event is pushed then.
+	 * @example
+	 * dataLayer.pageChange({ route: '/oferta', templateName: 'Offer' })
+	 * // { event: 'pageChange', route: '/oferta', templateName: 'Offer', deployName: 'prod' }
+	 */
+	public pageChange(fields: PageChangeFields): PageChangeEvent | undefined
 }
 
 export default TagManager

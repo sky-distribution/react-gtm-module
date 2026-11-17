@@ -92,6 +92,25 @@ TagManager.dataLayer({
 })
 ```
 
+### Shared page change event
+
+The `DataLayer` class pushes the `pageChange` event shared by all frontends that use the common GTM container. The event has the shape `{ event: 'pageChange', route?, templateName?, deployName? }`. At least one of `route` and `templateName` is required (the types enforce it).
+
+```js
+import { DataLayer } from '@sky-distribution/react-gtm-module'
+
+const dataLayer = new DataLayer({ deployName: 'prod' })
+
+dataLayer.pageChange({ route: '/oferta', templateName: 'Offer' })
+// pushes { event: 'pageChange', route: '/oferta', templateName: 'Offer', deployName: 'prod' }
+```
+
+An instance always pushes through `TagManager.dataLayer`, to `window.dataLayer` by default. Use `dataLayerName` to push to a custom dataLayer. If `window[dataLayerName]` does not exist yet, `TagManager.dataLayer` injects a script that creates it.
+
+`pageChange` returns the event it built. Fields that are empty or `undefined` are not added to the event, because `undefined` would clear a variable that someone else set in the GTM data model. When neither `route` nor `templateName` is given, `pageChange` logs a warning, pushes nothing and returns `undefined`. The `deployName` given to a call overrides the one given to the constructor.
+
+The class always pushes through `TagManager.dataLayer`, so the application decides whether GTM is enabled and whether the user gave consent (Consent Mode) before it calls `pageChange`.
+
 ## Configuration
 
 To adapt your GTM configuration to your needs, a number of options are available. You can find examples for each of them below the table.

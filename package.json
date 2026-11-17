@@ -1,6 +1,6 @@
 {
 	"name": "@sky-distribution/react-gtm-module",
-	"version": "3.1.0",
+	"version": "3.2.0",
 	"description": "React Google Tag Manager Module",
 	"main": "dist/index.js",
 	"types": "types/index.d.ts",
